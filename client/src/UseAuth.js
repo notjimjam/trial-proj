@@ -1,30 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
-function UseAuth(code) {
+function useAuth(code) {
+  const [auth, setAuth] = useState({});
   const [accessToken, setAccessToken] = useState();
   const [refreshToken, setRefreshToken] = useState();
   const [expiresIn, setExpiresIn] = useState();
+  const active = useRef({});
 
   useEffect(() => {
-    axios
-      .post('http://localhost:3001/login', {
+    if (active.current.code !== code) {
+      active.current = {
         code,
-      })
-      .then((res) => {
-        console.log(res.data);
-        // window.history.pushState({}, null, '/');
-        // setAccessToken(res.data.accessToken);
-        // setRefreshToken(res.data.refreshToken);
-        // setExpiresIn(res.data.expiresIn);
+        request: axios.post('http://localhost:3001/login', { code }),
+      };
+    }
+    active.current.request
+      .then(({ data }) => {
+        setAuth(data);
+        setAccessToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+        setExpiresIn(data.expiresIn);
+        // console.log(data);
+        window.history.pushState({}, null, '/');
       })
       .catch((err) => {
-        console.log(err);
         window.location = '/';
       });
   }, [code]);
 
-  return <div>UseAuth</div>;
+  // useEffect(() => {
+  //   if (!refreshToken || !expiresIn) return;
+  //   const interval = setInterval(() => {
+  //     axios
+  //       .post('http://localhost:3001/refresh', {
+  //         refreshToken,
+  //       })
+  //       .then((res) => {
+  //         setAccessToken(res.data.accessToken);
+  //         setExpiresIn(res.data.expiresIn);
+  //       })
+  //       .catch(() => {
+  //         window.location = '/';
+  //       });
+  //   }, (expiresIn - 60) * 1000);
+
+  //   return () => clearInterval(interval);
+  // }, [refreshToken, expiresIn]);
+
+  return auth && accessToken;
 }
 
-export default UseAuth;
+export default useAuth;

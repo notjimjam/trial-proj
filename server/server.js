@@ -7,6 +7,29 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+app.post('/refresh', (res, req) => {
+  const refreshToken = req.body.refreshToken;
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: 'http://localhost:3000',
+    clientId: '65bff13ca1f04d9bb848a77def5187d6',
+    clientSecret: '5f53c79892e0482893c47a6211db4b06',
+    refreshToken,
+  });
+
+  spotifyApi
+    .refreshAccessToken()
+    .then((data) => {
+      res.json({
+        accessToken: data.body.accessToken,
+        expiresIn: data.body.expiresIn,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 app.post('/login', (req, res) => {
   const code = req.body.code;
   const spotifyApi = new SpotifyWebApi({
