@@ -17,7 +17,6 @@ function Dashboard({ code }) {
 
   function chooseTrack(track) {
     setPlayingTrack(track);
-    // setSearch('');
   }
 
   useEffect(() => {
@@ -26,7 +25,7 @@ function Dashboard({ code }) {
   }, [accessToken]);
 
   useEffect(() => {
-    if (!search) return setSearchResults({});
+    if (!search) return setSearchResults([]);
     if (!accessToken) return;
 
     let cancel = false;
